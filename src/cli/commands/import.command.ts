@@ -8,13 +8,15 @@ export class ImportCommand implements Command {
 
   public async execute(...parameters: string[]): Promise<void> {
     const [filename] = parameters;
-    const fileReader = new TSVFileReader(filename.trim());
-
     try {
+      const fileReader = new TSVFileReader(filename.trim());
       fileReader.read();
       console.log(fileReader.toArray());
     } catch (error) {
       console.error(`Не удалось прочитать данные из файла ${filename}`);
+      if (error instanceof Error) {
+        console.error(`Детали: ${error.message}`);
+      }
     }
   }
 }

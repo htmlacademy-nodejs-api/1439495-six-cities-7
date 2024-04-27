@@ -5,9 +5,7 @@ import { Command } from './command.interface.js';
 
 
 export class VersionCommand implements Command {
-  constructor(
-    private readonly filePath: string = 'package.json'
-  ) {}
+  private readonly filePath: string = 'package.json';
 
   private readVersion(): string {
     const fileContent = JSON.parse(readFileSync(resolve(this.filePath), 'utf-8'));
