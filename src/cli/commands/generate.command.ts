@@ -3,6 +3,7 @@ import { Command } from './command.interface.js';
 import { MockServerData } from '../../shared/types/index.js';
 import { TSVOfferGenerator } from '../../shared/libs/offer-generator/index.js';
 import { TSVFileWriter } from '../../shared/libs/file-writer/index.js';
+import { CommandName } from '../commands.enum.js';
 
 export class GenerateCommand implements Command {
   private initialData: MockServerData;
@@ -25,7 +26,7 @@ export class GenerateCommand implements Command {
   }
 
   public getName(): string {
-    return '--generate';
+    return CommandName.Generate;
   }
 
   public async execute(...parameters: string[]): Promise<void> {

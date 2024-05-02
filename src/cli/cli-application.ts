@@ -1,12 +1,13 @@
 import chalk from 'chalk';
 import { CommandParser } from './command-parser.js';
 import { Command } from './commands/command.interface.js';
+import { CommandName } from './commands.enum.js';
 
 type CommandCollection = Record<string, Command>;
 
 export class CLIApplication {
   private commands: CommandCollection = {};
-  private readonly defaultCommand: string = '--help';
+  private readonly defaultCommand: string = CommandName.Help;
 
   public registerCommands(commandsList: Command[]): void {
     commandsList.forEach((command) => {

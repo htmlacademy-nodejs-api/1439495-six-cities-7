@@ -2,16 +2,8 @@ import dayjs from 'dayjs';
 import { getRandomItem, generateRandomValue, getRandomArray, getRandomBooleanValue } from '../../helpers/index.js';
 import { MockServerData } from '../../types/index.js';
 import { OfferGenerator } from './index.js';
+import { FIRST_WEEK_DAY, LAST_WEEK_DAY, IMAGES_IN_OFFER, MAX_ROOMS, MAX_GUESTS, MIN_PRICE, MAX_PRICE, COUNT_AMENITIES_IN_OFFER, MAX_COMMENTS_NUMBER } from './tsv-offer-generator.const.js';
 
-const FIRST_WEEK_DAY = 1;
-const LAST_WEEK_DAY = 7;
-const IMAGES_IN_OFFER = 6;
-const MAX_ROOMS = 8;
-const MAX_GUESTS = 10;
-const MIN_PRICE = 100;
-const MAX_PRICE = 100000;
-const COUNT_AMENITIES_IN_OFFER = 3;
-const MAX_COMMENTS_NUMBER = 20;
 
 export class TSVOfferGenerator implements OfferGenerator {
   constructor(
