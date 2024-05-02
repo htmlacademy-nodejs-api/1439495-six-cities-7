@@ -1,17 +1,23 @@
 import { TSVFileReader } from '../../shared/libs/file-reader/index.js';
+import { OfferRent } from '../../shared/types/index.js';
+import { CommandName } from '../commands.enum.js';
 import { Command } from './command.interface.js';
 
 export class ImportCommand implements Command {
-  public getName(): string {
-    return '--import';
+  private onReadOffer(offer: OfferRent): void {
+    console.info(offer);
   }
 
-  public async execute(...parameters: string[]): Promise<void> {
+  public getName(): string {
+    return CommandName.Import;
+  }
+
+  public execute(...parameters: string[]): void {
     const [filename] = parameters;
     try {
       const fileReader = new TSVFileReader(filename.trim());
+      fileReader.on('read', this.onReadOffer);
       fileReader.read();
-      console.log(fileReader.toArray());
     } catch (error) {
       console.error(`Не удалось прочитать данные из файла ${filename}`);
       if (error instanceof Error) {

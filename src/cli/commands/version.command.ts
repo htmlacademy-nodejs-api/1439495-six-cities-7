@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import chalk from 'chalk';
 import { Command } from './command.interface.js';
+import { CommandName } from '../commands.enum.js';
 
 
 export class VersionCommand implements Command {
@@ -13,10 +14,10 @@ export class VersionCommand implements Command {
   }
 
   public getName(): string {
-    return '--version';
+    return CommandName.Version;
   }
 
-  public async execute(..._parameters: string[]): Promise<void> {
+  public execute(..._parameters: string[]): void {
     try {
       const version = this.readVersion();
       console.info(chalk.blue(version));
