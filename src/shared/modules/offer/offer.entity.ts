@@ -1,4 +1,4 @@
-import { Ref, defaultClasses, getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
+import { Ref, Severity, defaultClasses, getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import { OfferType, City, Amenities, Coordinates } from '../../types/index.js';
 import { UserEntity } from '../user/index.js';
 
@@ -9,6 +9,9 @@ export interface OfferEntity extends defaultClasses.Base {}
   schemaOptions: {
     collection: 'offers',
     timestamps: true,
+  },
+  options: {
+    allowMixed: Severity.ALLOW
   }
 })
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
@@ -28,7 +31,7 @@ export class OfferEntity extends defaultClasses.TimeStamps {
   @prop({ required: true })
   public previewImage: string;
 
-  @prop({ required: true })
+  @prop({ required: true})
   public photo: string[];
 
   @prop({ required: true })
