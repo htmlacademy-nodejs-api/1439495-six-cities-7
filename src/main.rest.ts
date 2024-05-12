@@ -5,6 +5,8 @@ import { Config, RestConfig, RestSchema } from './shared/libs/config/index.js';
 import { Logger, PinoLogger } from './shared/libs/logger/index.js';
 import { Component } from './shared/types/index.js';
 import { DatabaseClient, MongoDatabaseClient } from './shared/libs/database-client/index.js';
+import { DefaultUserService, UserModel, UserService, UserEntity } from './shared/modules/user/index.js';
+import { types } from '@typegoose/typegoose';
 
 function bootstrap() {
   const container = new Container();
@@ -17,6 +19,16 @@ function bootstrap() {
   const application = container.get<RestApplication>(Component.RestApplication);
 
   application.init();
+  container.bind<UserService>(Component.UserService).to(DefaultUserService).inSingletonScope();
+  container.bind<types.ModelType<UserEntity>>(Component.UserModel).toConstantValue(UserModel);
+  const service = container.get<UserService>(Component.UserService);
+  service.create({
+    name: 'Anna',
+    mail: 'sdfsd@njd.ru',
+    avatar: 'sdfsf',
+    password: 'sdfsd4dsf',
+    isPro: false
+  }, 'dghjad');
 }
 
 bootstrap();
