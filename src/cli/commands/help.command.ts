@@ -16,10 +16,10 @@ export class HelpCommand implements Command {
 
       Команды:
 
-      ${chalk.blue(CommandName.Version)}:                   ${chalk.red('# выводит номер версии')}
-      ${chalk.blue(CommandName.Help)}:                      ${chalk.red('# печатает этот текст')}
-      ${chalk.blue(CommandName.Import)} <path>:             ${chalk.red('# импортирует данные из TSV')}
-      ${chalk.blue(CommandName.Generate)} <n> <path> <url>  ${chalk.red('# генерирует произвольное количество тестовых данных')}
+      ${chalk.blue(CommandName.Version)}:                                                 ${chalk.red('# выводит номер версии')}
+      ${chalk.blue(CommandName.Help)}:                                                    ${chalk.red('# печатает этот текст')}
+      ${chalk.blue(CommandName.Import)} <path> <login> <password> <host> <port> <dbname>  ${chalk.red('# импортирует данные из TSV в базу данных (необходимо указать настройки для подключения)')}
+      ${chalk.blue(CommandName.Generate)} <n> <path> <url>                                ${chalk.red('# генерирует произвольное количество тестовых данных')}
     `);
   }
 }
