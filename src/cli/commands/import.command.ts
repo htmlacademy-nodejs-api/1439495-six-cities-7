@@ -57,7 +57,13 @@ export class ImportCommand implements Command {
   }
 
   public async execute(filename: string, login: string, password: string, host: string, port: string, dbname: string): Promise<void> {
-    const uri = getMongoURI(login, password, host, +port, dbname);
+    const uri = getMongoURI({
+      username: login,
+      password,
+      host,
+      port: +port,
+      databaseName: dbname
+    });
     await this.databaseClient.connect(uri);
 
     try {

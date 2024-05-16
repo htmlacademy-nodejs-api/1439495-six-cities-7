@@ -14,13 +14,13 @@ export class RestApplication {
   ) {}
 
   private initDb() {
-    const mongoUri = getMongoURI(
-      this.config.get('DB_USER'),
-      this.config.get('DB_PASSWORD'),
-      this.config.get('DB_HOST'),
-      this.config.get('DB_PORT'),
-      this.config.get('DB_NAME')
-    );
+    const mongoUri = getMongoURI({
+      username: this.config.get('DB_USER'),
+      password: this.config.get('DB_PASSWORD'),
+      host: this.config.get('DB_HOST'),
+      port: this.config.get('DB_PORT'),
+      databaseName: this.config.get('DB_NAME')
+    });
 
     return this.databaseClient.connect(mongoUri);
   }
