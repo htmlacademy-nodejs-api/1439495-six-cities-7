@@ -1,0 +1,463 @@
+openapi: 3.0.0
+info:
+  title: API сервер для проекта «Шесть городов».
+  description: |-
+    * Список ресурсов и маршрутов сервера «Шесть городов».
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: 2.0.0
+tags:
+  - name: offers
+    description: Действия с предложениями по аренде.
+  - name: comments
+    description: Действия с комментариями к предложению.
+  - name: users
+    description: Действия с пользователем.
+
+paths:
+  /offers:
+    get:
+      tags:
+        - offers
+      summary: Получить список всех предложений
+      description: Возвращает список всех предложений для аренды
+
+      responses:
+        "200":
+          description: Возвращает список предложений.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offerinList'
+
+    post:
+      tags:
+        - offers
+      summary: Создать новое предложение
+      description: Создает новое предложение для аренды.
+
+      requestBody:
+        description: Информация для создания нового предложения
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/offer'
+        required: true
+
+      responses:
+        "201":
+          description: Предложение создано. Возвращает объект предложения.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+        "400":
+          description: Ошибка валидации. Данные указаны неверно.
+
+        "401":
+          description: Пользователь не авторизован.
+
+  /offers/{offerId}:
+    get:
+      tags:
+        - offers
+      summary: Получение детальной информации по предложению
+      description: Возвращает детальную информацию по предложению
+
+      responses:
+        "200":
+          description: Возвращает детальную информацию по предложению.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+    patch:
+      tags:
+        - offers
+      summary: Редактировать предложение
+      description: Возвращает обновленную информацию по предложению
+
+      requestBody:
+        description: Информация для редактирования предложения
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/offer'
+        required: true
+
+      responses:
+        "201":
+          description: Предложение отредактировано. Возвращает обновленный объект предложения.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+        "400":
+          description: Ошибка валидации. Данные указаны неверно.
+
+        "401":
+          description: Пользователь не авторизован.
+
+        "409":
+          description: Нельзя редактировать чужое предложение по аренде.
+
+    delete:
+      tags:
+        - offers
+      summary: Удалить предложение
+      description: Удаляет предложение
+
+      responses:
+        "204":
+          description: Предложение успешно удалено.
+
+        "401":
+          description: Пользователь не авторизован.
+
+        "409":
+          description: Нельзя удалить чужое предложение по аренде.
+
+  /offers/premium:
+    get:
+      tags:
+        - offers
+      summary: Получить список премиальных предложений
+      description: Возвращает список премиальных предложений для аренды
+
+      responses:
+        "200":
+          description: Возвращает список премиальных предложений.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offerinList'
+
+  /offers/favorite:
+    get:
+      tags:
+        - offers
+      summary: Получить список предложений, добавленных в избранное
+      description: Возвращает список избранных предложений для аренды
+
+      responses:
+        "200":
+          description: Возвращает список избранных предложений.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offerinList'
+
+        "401":
+          description: Ошибка авторизации. Пользователь не авторизован.
+
+  /offers/favorite/{offerId}/{action}:
+    post:
+      tags:
+        - offers
+      summary: Добавляет или удаляет предложение из избранного
+      description: Добавляет или удаляет предложение из избранного
+
+      responses:
+        "201":
+          description: Возвращает новую информацию о предложении.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/offer'
+
+        "401":
+          description: Ошибка авторизации. Пользователь не авторизован.
+
+  /comments/{offerId}:
+    get:
+      tags:
+        - comments
+      summary: Получить список всех комментариев для предложения
+      description: Возвращает список всех комментариев для предложения
+
+      responses:
+        "200":
+          description: Возвращает список комментариев для предложения.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/comment'
+
+    post:
+      tags:
+        - comments
+      summary: Создать новый комментарий
+      description: Добавляет новый комментарий к предложению
+
+      requestBody:
+        description: Информация для создания нового комментария
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/comment'
+        required: true
+
+      responses:
+        "201":
+          description: Комментарий создан. Возвращает объект комментария.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+        "400":
+          description: Ошибка валидации. Данные указаны неверно.
+
+        "401":
+          description: Пользователь не авторизован.
+
+  /users/register:
+    post:
+      tags:
+        - users
+      summary: Создание нового пользователя
+      description: Возвращает информацию о созданном пользователе
+
+      requestBody:
+        description: Информация для создания нового пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createUser'
+        required: true
+
+      responses:
+        "201":
+          description: Пользователь зарегистрирован. Возвращает объект пользователя.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+        "400":
+          description: Ошибка валидации. Данные указаны неверно.
+
+        "409":
+          description: Пользователь с таким email уже существует.
+
+  /users/login:
+    get:
+      tags:
+        - users
+      summary: Проверка состояния пользователя
+      description: Возвращает информацию об авторизованном пользователе
+
+      responses:
+        "200":
+          description: Пользователь авторизован. Возвращает объект пользователя.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+
+        "401":
+          description: Пользователь не авторизован.
+
+    post:
+      tags:
+        - users
+      summary: Авторизует существующего пользователя на основании логина и пароля
+      description: Возвращает токен авторизации
+
+      requestBody:
+        description: Информация для авторизации пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/authUser'
+        required: true
+
+      responses:
+        "200":
+          description: Пользователь успешно авторизован. Возвращает токен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userToken'
+
+        "400":
+          description: Ошибка валидации. Пользователя с такими данными не существует.
+
+  /users/logout:
+    get:
+      tags:
+        - users
+      summary: Завершает пользовательскую сессию
+      description: Завершает пользовательскую сессию
+
+      responses:
+        "204":
+          description: Сеанс завершен.
+
+        "401":
+          description: Ошибка авторизации. Пользователь не авторизован.
+
+
+components:
+  schemas:
+    offerinList:
+      type: object
+
+      properties:
+        name:
+          type: string
+          example: House in countryside
+        date:
+          type: string
+          example: 2024-03-15T12:48:40.284Z
+        city:
+          type: string
+          example: Amsterdam
+        previewImage:
+          type: string
+          example: https://15.design.htmlacademy.pro/static/hotel/9.jpg
+        isPremium:
+          type: boolean
+          example: true
+        isFavorite:
+          type: boolean
+          example: false
+        rating:
+          type: number
+          example: 4
+        type:
+          type: string
+          example: house
+        price:
+          type: number
+          example: 1100
+
+    offer:
+      type: object
+
+      properties:
+        name:
+          type: string
+          example: House in countryside
+        description:
+          type: string
+          example: A new spacious villa, one floor. All commodities, jacuzzi and beautiful scenery.
+        date:
+          type: string
+          example: 2024-03-15T12:48:40.284Z
+        city:
+          type: string
+          example: Amsterdam
+        previewImage:
+          type: string
+          example: https://15.design.htmlacademy.pro/static/hotel/9.jpg
+        photo:
+          type: string
+          example: https://15.design.htmlacademy.pro/static/hotel/2.jpg;https://15.design.htmlacademy.pro/static/hotel/15.jpg;https://15.design.htmlacademy.pro/static/hotel/3.jpg
+        isPremium:
+          type: boolean
+          example: false
+        isFavorite:
+          type: boolean
+          example: false
+        rating:
+          type: number
+          example: 4
+        type:
+          type: string
+          example: house
+        rooms:
+          type: number
+          example: 3
+        guests:
+          type: number
+          example: 5
+        price:
+          type: number
+          example: 1100
+        amenities:
+          type: string
+          example: Fridge;Breakfast;Washer
+        userId:
+          type: string
+          example: ashdghajdajas4sd
+        coordinates:
+          type: string
+          example: 52.370216	4.895168
+
+    comment:
+      type: object
+
+      properties:
+        text:
+          type: string
+          example: Some comment
+        date:
+          type: string
+          example: 2024-03-15T12:48:40.284Z
+        rating:
+          type: number
+          example: 3
+        userId:
+          type: string
+          example: ashdghajdajas4sd
+
+    authUser:
+      type: object
+
+      properties:
+        mail:
+          type: string
+          example: qwerty123@mail.ru
+        password:
+          type: string
+          example: qwer123
+
+    userToken:
+      type: object
+
+      properties:
+        token:
+          type: string
+          example: T2xpdmVyLmNvbm5lckBnbWFpbC5jb20=
+
+    createUser:
+      type: object
+
+      properties:
+        name:
+          type: string
+          example: Christina
+        mail:
+          type: string
+          example: qwerty123@mail.ru
+        avatar:
+          type: string
+          example: https://15.design.htmlacademy.pro/static/avatar/6.jpg
+        password:
+          type: string
+          example: qwer123
+        isPro:
+          type: boolean
+          example: false
+
+    user:
+      type: object
+
+      properties:
+        name:
+          type: string
+          example: Christina
+        mail:
+          type: string
+          example: qwerty123@mail.ru
+        avatar:
+          type: string
+          example: https://15.design.htmlacademy.pro/static/avatar/6.jpg
+        isPro:
+          type: boolean
+          example: false
