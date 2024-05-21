@@ -28,11 +28,25 @@ export class DefaultOfferService implements OfferService {
   public async findAll(count?: number): Promise<DocumentType<OfferEntity>[]> {
     const limit = count ?? DEFAULT_OFFER_LIMIT;
     return this.offerModel
-      .find()
-      .sort({createdAt: SortType.Down})
-      .limit(limit)
-      .select(DEFAULT_OFFER_FIELDS_RETURN)
-      .exec();
+      .aggregate([
+        {
+          $lookup: {
+            from: 'comments',
+            let: { currentOfferId: '$_id'},
+            pipeline: [
+              { $match: { $expr: { $eq: ['$$currentOfferId', '$offerId'] } } },
+              { $group: { _id: '$$currentOfferId', averageRating: {$avg: '$rating'} } }
+            ],
+            as: 'comments'
+          },
+        },
+        { $addFields:
+            { id: { $toString: '$_id'}, commentsCount: { $size: '$comments'}, averageRating: '$comments.averageRating' }
+        },
+        { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities'] },
+        { $sort: { createdAt: SortType.Down } },
+        { $limit: limit }
+      ]).exec();
   }
 
   public async findPremium(city: City): Promise<DocumentType<OfferEntity>[]> {
