@@ -2,8 +2,26 @@ import { DocumentType, types } from '@typegoose/typegoose';
 import { inject, injectable } from 'inversify';
 import { CreateOfferDto, UpdateOfferDto, OfferEntity, OfferService } from './index.js';
 import { Logger } from '../../libs/logger/index.js';
-import { DEFAULT_OFFER_FIELDS_RETURN, DEFAULT_OFFER_LIMIT, PREMIUM_OFFER_LIMIT } from './offer.constant.js';
+import { DEFAULT_OFFER_LIMIT, PREMIUM_OFFER_LIMIT } from './offer.constant.js';
 import { SortType, Component, City } from '../../types/index.js';
+import { Types } from 'mongoose';
+
+const addRatingToOffers = [
+  {
+    $lookup: {
+      from: 'comments',
+      localField: '_id',
+      foreignField: 'offerId',
+      as: 'comments'
+    },
+  },
+  {
+    $addFields: {
+      id: { $toString: '$_id'},
+      rating: { $avg: '$comments.rating' }
+    }
+  }
+];
 
 @injectable()
 export class DefaultOfferService implements OfferService {
@@ -19,50 +37,78 @@ export class DefaultOfferService implements OfferService {
   }
 
   public async findById(id: string): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel
-      .findById(id)
-      .populate(['userId'])
-      .exec();
-  }
-
-  public async findAll(count?: number): Promise<DocumentType<OfferEntity>[]> {
-    const limit = count ?? DEFAULT_OFFER_LIMIT;
-    return this.offerModel
-      .aggregate([
+    const result = await this.offerModel
+      .aggregate<DocumentType<OfferEntity> | null>([
+        {
+          $match: {
+            _id: new Types.ObjectId(id),
+          }
+        },
         {
           $lookup: {
             from: 'comments',
-            let: { currentOfferId: '$_id'},
-            pipeline: [
-              { $match: { $expr: { $eq: ['$$currentOfferId', '$offerId'] } } },
-              { $group: { _id: '$$currentOfferId', averageRating: {$avg: '$rating'} } }
-            ],
+            localField: '_id',
+            foreignField: 'offerId',
             as: 'comments'
           },
         },
-        { $addFields:
-            { id: { $toString: '$_id'}, commentsCount: { $size: '$comments'}, averageRating: '$comments.averageRating' }
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'users'
+          },
         },
-        { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities'] },
+        {
+          $addFields: {
+            commentCount: { $size: '$comments' },
+            rating: { $avg: '$comments.rating' },
+            user: { '$arrayElemAt': ['$users', 0] }
+          }
+        },
+        { $unset: ['comments', 'users'] },
+      ]).exec();
+    return result[0];
+  }
+
+  public async findAll(count: number = DEFAULT_OFFER_LIMIT): Promise<DocumentType<OfferEntity>[]> {
+    return this.offerModel
+      .aggregate([
+        ...addRatingToOffers,
+        { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
         { $sort: { createdAt: SortType.Down } },
-        { $limit: limit }
+        { $limit: count }
       ]).exec();
   }
 
   public async findPremium(city: City): Promise<DocumentType<OfferEntity>[]> {
     return this.offerModel
-      .find({isPremium: true, city})
-      .sort({createdAt: SortType.Down})
-      .limit(PREMIUM_OFFER_LIMIT)
-      .select(DEFAULT_OFFER_FIELDS_RETURN)
-      .exec();
+      .aggregate([
+        {
+          $match: {
+            isPremium: true,
+            city
+          }
+        },
+        ...addRatingToOffers,
+        { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
+        { $sort: { createdAt: SortType.Down } },
+        { $limit: PREMIUM_OFFER_LIMIT }
+      ]).exec();
   }
 
   public async findFavorite(): Promise<DocumentType<OfferEntity>[]> {
     return this.offerModel
-      .find({isFavorite: true})
-      .select(DEFAULT_OFFER_FIELDS_RETURN)
-      .exec();
+      .aggregate([
+        {
+          $match: {
+            isFavorite: true,
+          }
+        },
+        ...addRatingToOffers,
+        { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
+      ]).exec();
   }
 
   public async addToFavorite(id: string): Promise<DocumentType<OfferEntity> | null> {
