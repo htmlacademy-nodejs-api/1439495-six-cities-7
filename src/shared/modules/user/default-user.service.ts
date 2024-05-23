@@ -24,7 +24,7 @@ export class DefaultUserService implements UserService {
   }
 
   public async findById(id: string): Promise<DocumentType<UserEntity> | null> {
-    return this.userModel.findById({id});
+    return this.userModel.findById(id);
   }
 
   public async findOrCreate(dto: CreateUserDto, salt: string): Promise<DocumentType<UserEntity>> {
