@@ -5,6 +5,7 @@ import { Logger } from '../shared/libs/logger/index.js';
 import { Component } from '../shared/types/component.enum.js';
 import { DatabaseClient } from '../shared/libs/database-client/index.js';
 import { getMongoURI } from '../shared/helpers/index.js';
+import { Controller } from '../shared/libs/rest/controller/index.js';
 
 @injectable()
 export class RestApplication {
@@ -14,6 +15,7 @@ export class RestApplication {
     @inject(Component.Logger) private readonly logger: Logger,
     @inject(Component.Config) private readonly config: Config<RestSchema>,
     @inject(Component.DatabaseClient) private readonly databaseClient: DatabaseClient,
+    @inject(Component.OfferController) private readonly offerController: Controller
   ) {}
 
   private initDb() {
@@ -33,10 +35,24 @@ export class RestApplication {
     this.server.listen(port);
   }
 
+  private async initControllers() {
+    this.server.use('/offers', this.offerController.router);
+  }
+
+  private async initMiddleware() {
+    this.server.use(express.json());
+  }
+
   public async init() {
     this.logger.info('Application initialized');
 
     await this.initDb();
+
+    await this.initMiddleware();
+
+    await this.initControllers();
+    this.logger.info('Controller initialization completed');
+
     await this.initServer();
     this.logger.info(`Server started on http://localhost:${this.config.get('PORT')}`);
   }
