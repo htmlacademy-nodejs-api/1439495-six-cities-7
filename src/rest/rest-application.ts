@@ -6,6 +6,7 @@ import { Component } from '../shared/types/component.enum.js';
 import { DatabaseClient } from '../shared/libs/database-client/index.js';
 import { getMongoURI } from '../shared/helpers/index.js';
 import { Controller } from '../shared/libs/rest/controller/index.js';
+import { ExceptionFilter } from '../shared/libs/rest/exception-filter/index.js';
 
 @injectable()
 export class RestApplication {
@@ -16,7 +17,8 @@ export class RestApplication {
     @inject(Component.Config) private readonly config: Config<RestSchema>,
     @inject(Component.DatabaseClient) private readonly databaseClient: DatabaseClient,
     @inject(Component.OfferController) private readonly offerController: Controller,
-    @inject(Component.UserController) private readonly userController: Controller
+    @inject(Component.UserController) private readonly userController: Controller,
+    @inject(Component.ExceptionFilter) private readonly appExceptionFilter: ExceptionFilter
   ) {}
 
   private initDb() {
@@ -45,6 +47,10 @@ export class RestApplication {
     this.server.use(express.json());
   }
 
+  private async initExceptionFilter() {
+    this.server.use(this.appExceptionFilter.catch.bind(this.appExceptionFilter));
+  }
+
   public async init() {
     this.logger.info('Application initialized');
 
@@ -54,6 +60,8 @@ export class RestApplication {
 
     await this.initControllers();
     this.logger.info('Controller initialization completed');
+
+    await this.initExceptionFilter();
 
     await this.initServer();
     this.logger.info(`Server started on http://localhost:${this.config.get('PORT')}`);

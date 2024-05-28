@@ -6,6 +6,8 @@ import { Logger } from '../../libs/logger/index.js';
 import { CreateUserDto, LoginUserDto, UserRdo, UserService } from './index.js';
 import { fillDTO } from '../../helpers/index.js';
 import { Config, RestSchema } from '../../libs/config/index.js';
+import { HttpError } from '../../libs/rest/errors/index.js';
+import { StatusCodes } from 'http-status-codes';
 
 @injectable()
 export class UserController extends BaseController {
@@ -23,16 +25,15 @@ export class UserController extends BaseController {
   public async login({body}: Request<Record<string, unknown>, Record<string, unknown>, LoginUserDto>, res: Response): Promise<void> {
     const user = await this.userService.findByEmail(body.mail);
     if (!user) {
-      throw new Error('Неверно!');
+      throw new HttpError(StatusCodes.UNAUTHORIZED, `User with email ${body.mail} not found.`, 'UserController');
     }
-    const data = fillDTO(UserRdo, user);
-    this.ok(res, data);
+    this.ok(res, fillDTO(UserRdo, user));
   }
 
   public async create({body}: Request<Record<string, unknown>, Record<string, unknown>, CreateUserDto>, res: Response): Promise<void> {
     const user = await this.userService.findByEmail(body.mail);
     if (user) {
-      throw new Error('Пользователь уже существует!');
+      throw new HttpError(StatusCodes.CONFLICT, `User with email ${body.mail} is already exist`, 'UserController');
     }
     const result = await this.userService.create(body, this.config.get('SALT'));
     this.created(res, fillDTO(UserRdo, result));
