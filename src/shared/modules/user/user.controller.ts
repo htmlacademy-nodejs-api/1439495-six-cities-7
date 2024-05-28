@@ -25,7 +25,7 @@ export class UserController extends BaseController {
   public async login({body}: Request<Record<string, unknown>, Record<string, unknown>, LoginUserDto>, res: Response): Promise<void> {
     const user = await this.userService.findByEmail(body.mail);
     if (!user) {
-      throw new HttpError(StatusCodes.UNAUTHORIZED, `User with email ${body.mail} not found.`, 'UserController');
+      throw new HttpError(StatusCodes.UNAUTHORIZED, `User with email ${body.mail} does not exist.`, 'UserController');
     }
     this.ok(res, fillDTO(UserRdo, user));
   }
