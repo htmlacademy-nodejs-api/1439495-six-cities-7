@@ -5,7 +5,7 @@ import { City } from '../../types/index.js';
 export interface OfferService {
   create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>>;
   findById(id: string): Promise<DocumentType<OfferEntity> | null>;
-  findAll(count: number): Promise<DocumentType<OfferEntity>[]>;
+  findAll(count?: number): Promise<DocumentType<OfferEntity>[]>;
   findPremium(city: City): Promise<DocumentType<OfferEntity>[]>;
   findFavorite(): Promise<DocumentType<OfferEntity>[]>;
   addToFavorite(id: string): Promise<DocumentType<OfferEntity> | null>;
