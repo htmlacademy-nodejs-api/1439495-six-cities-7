@@ -1,5 +1,6 @@
-import { Expose } from 'class-transformer';
-import { Amenities, City, Coordinates, OfferType, User } from '../../../types/index.js';
+import { Expose, Type } from 'class-transformer';
+import { Amenities, City, Coordinates, OfferType } from '../../../types/index.js';
+import { UserRdo } from '../../user/index.js';
 
 export class FullOfferRdo {
   @Expose()
@@ -51,7 +52,8 @@ export class FullOfferRdo {
   public amenities: Amenities[];
 
   @Expose()
-  public user: Omit <User, 'password'>;
+  @Type(() => UserRdo)
+  public user: UserRdo;
 
   @Expose()
   public coordinates: Coordinates;
