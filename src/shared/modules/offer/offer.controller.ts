@@ -7,6 +7,7 @@ import { CreateOfferDto, OfferRdo, OfferService, FullOfferRdo, UpdateOfferDto } 
 import { fillDTO } from '../../helpers/index.js';
 import { HttpError } from '../../libs/rest/errors/index.js';
 import { StatusCodes } from 'http-status-codes';
+import { ValidateObjectIdMiddleware } from '../../libs/rest/middleware/index.js';
 
 @injectable()
 export class OfferController extends BaseController {
@@ -17,9 +18,9 @@ export class OfferController extends BaseController {
     super(logger);
     this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
     this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Get, handler: this.getFullInfo });
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Patch, handler: this.update });
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Delete, handler: this.delete });
+    this.addRoute({ path: '/:offerId', method: HttpMethod.Get, handler: this.getFullInfo, middlewares: [new ValidateObjectIdMiddleware('offerId')] });
+    this.addRoute({ path: '/:offerId', method: HttpMethod.Patch, handler: this.update, middlewares: [new ValidateObjectIdMiddleware('offerId')] });
+    this.addRoute({ path: '/:offerId', method: HttpMethod.Delete, handler: this.delete, middlewares: [new ValidateObjectIdMiddleware('offerId')] });
     this.addRoute({ path: '/premium/:city', method: HttpMethod.Get, handler: this.getPremium });
   }
 

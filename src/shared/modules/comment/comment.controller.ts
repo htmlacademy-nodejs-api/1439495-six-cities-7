@@ -5,6 +5,7 @@ import { Component, HttpMethod } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { CommentRdo, CommentService, CreateCommentDto } from './index.js';
 import { fillDTO } from '../../helpers/index.js';
+import { ValidateObjectIdMiddleware } from '../../libs/rest/middleware/index.js';
 
 @injectable()
 export class CommentController extends BaseController {
@@ -13,8 +14,8 @@ export class CommentController extends BaseController {
     @inject(Component.CommentService) private readonly commentService: CommentService
   ) {
     super(logger);
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Post, handler: this.create });
-    this.addRoute({ path: '/:offerId', method: HttpMethod.Get, handler: this.index });
+    this.addRoute({ path: '/', method: HttpMethod.Post, handler: this.create });
+    this.addRoute({ path: '/:offerId', method: HttpMethod.Get, handler: this.index, middlewares: [new ValidateObjectIdMiddleware('offerId')] });
   }
 
   public async index(req: Request, res: Response): Promise<void> {
