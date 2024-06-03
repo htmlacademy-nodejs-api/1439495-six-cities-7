@@ -8,6 +8,7 @@ import { fillDTO } from '../../helpers/index.js';
 import { Config, RestSchema } from '../../libs/config/index.js';
 import { HttpError } from '../../libs/rest/errors/index.js';
 import { StatusCodes } from 'http-status-codes';
+import { ValidateDtoMiddleware } from '../../libs/rest/middleware/validate-dto.middleware.js';
 
 @injectable()
 export class UserController extends BaseController {
@@ -18,8 +19,18 @@ export class UserController extends BaseController {
   ) {
     super(logger);
 
-    this.addRoute({ path: '/login', method: HttpMethod.Get, handler: this.login });
-    this.addRoute({ path: '/register', method: HttpMethod.Post, handler: this.create });
+    this.addRoute({
+      path: '/login',
+      method: HttpMethod.Post,
+      handler: this.login,
+      middlewares: [new ValidateDtoMiddleware(LoginUserDto)]
+    });
+    this.addRoute({
+      path: '/register',
+      method: HttpMethod.Post,
+      handler: this.register,
+      middlewares: [new ValidateDtoMiddleware(CreateUserDto)]
+    });
   }
 
   public async login({body}: Request<Record<string, unknown>, Record<string, unknown>, LoginUserDto>, res: Response): Promise<void> {
@@ -30,7 +41,7 @@ export class UserController extends BaseController {
     this.ok(res, fillDTO(UserRdo, user));
   }
 
-  public async create({body}: Request<Record<string, unknown>, Record<string, unknown>, CreateUserDto>, res: Response): Promise<void> {
+  public async register({body}: Request<Record<string, unknown>, Record<string, unknown>, CreateUserDto>, res: Response): Promise<void> {
     const user = await this.userService.findByEmail(body.mail);
     if (user) {
       throw new HttpError(StatusCodes.CONFLICT, `User with email ${body.mail} is already exist`, 'UserController');
