@@ -1,5 +1,3 @@
-//export type Amenities = 'Breakfast' | 'Air conditioning' | 'Laptop friendly workspace' | 'Baby seat' | 'Washer' | 'Towels' | 'Fridge';
-
 export enum Amenities {
   'Breakfast' = 'Breakfast',
   'Air conditioning' = 'Air conditioning',
