@@ -10,8 +10,8 @@ export class ValidateDtoMiddleware implements Middleware {
   ) {}
 
   public async execute({ body }: Request, res: Response, next: NextFunction): Promise<void> {
-    const dtoInstance = plainToInstance(this.dto, body);
-    const errors = await validate(dtoInstance);
+    const instance = plainToInstance(this.dto, body);
+    const errors = await validate(instance);
 
     if (errors.length > 0) {
       res.status(StatusCodes.BAD_REQUEST).send(errors);

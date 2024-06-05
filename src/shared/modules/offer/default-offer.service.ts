@@ -31,7 +31,8 @@ export class DefaultOfferService implements OfferService {
   ) {}
 
   public async exists(id: string): Promise<boolean> {
-    return (await this.offerModel.exists({_id: id})) !== null;
+    const result = await this.offerModel.exists({_id: id});
+    return result !== null;
   }
 
   public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
