@@ -9,6 +9,7 @@ import { Config, RestSchema } from '../../libs/config/index.js';
 import { HttpError } from '../../libs/rest/errors/index.js';
 import { StatusCodes } from 'http-status-codes';
 import { ValidateDtoMiddleware } from '../../libs/rest/middleware/validate-dto.middleware.js';
+import { ValidateObjectIdMiddleware, UploadFileMiddleware } from '../../libs/rest/middleware/index.js';
 
 @injectable()
 export class UserController extends BaseController {
@@ -31,6 +32,15 @@ export class UserController extends BaseController {
       handler: this.register,
       middlewares: [new ValidateDtoMiddleware(CreateUserDto)]
     });
+    this.addRoute({
+      path: '/:userId/avatar',
+      method: HttpMethod.Post,
+      handler: this.uploadAvatar,
+      middlewares: [
+        new ValidateObjectIdMiddleware('userId'),
+        new UploadFileMiddleware(this.config.get('UPLOAD_DIRECTORY'), 'avatar'),
+      ]
+    });
   }
 
   public async login({body}: Request<Record<string, unknown>, Record<string, unknown>, LoginUserDto>, res: Response): Promise<void> {
@@ -48,6 +58,12 @@ export class UserController extends BaseController {
     }
     const result = await this.userService.create(body, this.config.get('SALT'));
     this.created(res, fillDTO(UserRdo, result));
+  }
+
+  public async uploadAvatar(req: Request, res: Response) {
+    this.created(res, {
+      filepath: req.file?.path
+    });
   }
 
 }
