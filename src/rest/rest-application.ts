@@ -19,7 +19,8 @@ export class RestApplication {
     @inject(Component.OfferController) private readonly offerController: Controller,
     @inject(Component.UserController) private readonly userController: Controller,
     @inject(Component.CommentController) private readonly commentController: Controller,
-    @inject(Component.ExceptionFilter) private readonly appExceptionFilter: ExceptionFilter
+    @inject(Component.ExceptionFilter) private readonly appExceptionFilter: ExceptionFilter,
+    @inject(Component.AuthExceptionFilter) private readonly authExceptionFilter: ExceptionFilter,
   ) {}
 
   private initDb() {
@@ -45,12 +46,13 @@ export class RestApplication {
     this.server.use('/comments', this.commentController.router);
   }
 
-  private async initMiddleware() {
+  private async initMiddlewares() {
     this.server.use(express.json());
     this.server.use('/uploads', express.static(this.config.get('UPLOAD_DIRECTORY')));
   }
 
-  private async initExceptionFilter() {
+  private async initExceptionFilters() {
+    this.server.use(this.authExceptionFilter.catch.bind(this.authExceptionFilter));
     this.server.use(this.appExceptionFilter.catch.bind(this.appExceptionFilter));
   }
 
@@ -59,12 +61,12 @@ export class RestApplication {
 
     await this.initDb();
 
-    await this.initMiddleware();
+    await this.initMiddlewares();
 
     await this.initControllers();
     this.logger.info('Controller initialization completed');
 
-    await this.initExceptionFilter();
+    await this.initExceptionFilters();
 
     await this.initServer();
     this.logger.info(`Server started on http://localhost:${this.config.get('PORT')}`);
