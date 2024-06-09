@@ -5,7 +5,7 @@ import { Component, HttpMethod } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
 import { CommentRdo, CommentService, CreateCommentDto } from './index.js';
 import { fillDTO } from '../../helpers/index.js';
-import { ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/middleware/index.js';
+import { PrivateRouteMiddleware, ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/middleware/index.js';
 
 @injectable()
 export class CommentController extends BaseController {
@@ -18,7 +18,7 @@ export class CommentController extends BaseController {
       path: '/',
       method: HttpMethod.Post,
       handler: this.create,
-      middlewares: [new ValidateDtoMiddleware(CreateCommentDto)]
+      middlewares: [new PrivateRouteMiddleware(), new ValidateDtoMiddleware(CreateCommentDto)]
     });
     this.addRoute({
       path: '/:offerId',
