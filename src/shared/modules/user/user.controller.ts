@@ -48,13 +48,8 @@ export class UserController extends BaseController {
   public async login({body}: Request<Record<string, unknown>, Record<string, unknown>, LoginUserDto>, res: Response): Promise<void> {
     const user = await this.authService.verify(body);
     const token = await this.authService.authenticate(user);
-    
-    //TODO: LoggedUserRdo вместо UserRdo, посмотреть какая информация должна возвращаться по ТЗ
-    const responseData = fillDTO(UserRdo, {
-      email: user.mail,
-      token,
-    });
-    this.ok(res, responseData);
+
+    this.ok(res, {token});
   }
 
   public async register({body}: Request<Record<string, unknown>, Record<string, unknown>, CreateUserDto>, res: Response): Promise<void> {

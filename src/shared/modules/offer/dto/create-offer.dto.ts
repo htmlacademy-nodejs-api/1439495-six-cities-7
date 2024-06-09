@@ -4,7 +4,6 @@ import {
   IsDateString,
   IsEnum,
   IsInt,
-  IsMongoId,
   Max,
   MaxLength,
   Min,
@@ -70,7 +69,6 @@ export class CreateOfferDto {
   @IsEnum(Amenities, { each: true, message: OfferValidationMessage.amenities.invalid })
   public amenities: Amenities[];
 
-  @IsMongoId({ message: OfferValidationMessage.userId.invalidId })
   public userId: string;
 
   @ValidateNested({ message: OfferValidationMessage.coordinates.invalid })
