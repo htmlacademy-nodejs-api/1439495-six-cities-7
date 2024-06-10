@@ -11,7 +11,7 @@ import { Command } from './command.interface.js';
 export class ImportCommand implements Command {
   private logger = new PinoLogger();
   private userService = new DefaultUserService(this.logger, UserModel);
-  private offerService = new DefaultOfferService(this.logger, OfferModel);
+  private offerService = new DefaultOfferService(this.logger, OfferModel, UserModel);
   private databaseClient = new MongoDatabaseClient(this.logger);
   private salt = 'secret string';
 

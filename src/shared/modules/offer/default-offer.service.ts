@@ -5,6 +5,7 @@ import { Logger } from '../../libs/logger/index.js';
 import { DEFAULT_OFFER_LIMIT, PREMIUM_OFFER_LIMIT } from './offer.constant.js';
 import { SortType, Component, City } from '../../types/index.js';
 import { Types } from 'mongoose';
+import { UserEntity } from '../user/index.js';
 
 const addRatingToOffers = [
   {
@@ -27,7 +28,8 @@ const addRatingToOffers = [
 export class DefaultOfferService implements OfferService {
   constructor(
     @inject(Component.Logger) private readonly logger: Logger,
-    @inject(Component.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>
+    @inject(Component.OfferModel) private readonly offerModel: types.ModelType<OfferEntity>,
+    @inject(Component.UserModel) private readonly userModel: types.ModelType<UserEntity>
   ) {}
 
   public async exists(id: string): Promise<boolean> {
@@ -69,7 +71,8 @@ export class DefaultOfferService implements OfferService {
           $addFields: {
             commentCount: { $size: '$comments' },
             rating: { $avg: '$comments.rating' },
-            user: { '$arrayElemAt': ['$users', 0] }
+            user: { '$arrayElemAt': ['$users', 0] },
+            isFavorite: { $in: '$user.favoriteOffersId' }
           }
         },
         { $unset: ['comments', 'users'] },
@@ -81,6 +84,19 @@ export class DefaultOfferService implements OfferService {
     return this.offerModel
       .aggregate([
         ...addRatingToOffers,
+        { $addFields: { isFavorite: false } },
+        { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
+        { $sort: { createdAt: SortType.Down } },
+        { $limit: count }
+      ]).exec();
+  }
+
+  public async findAllForUser(userId: string, count: number = DEFAULT_OFFER_LIMIT): Promise<DocumentType<OfferEntity>[]> {
+    const user = await this.userModel.findById(userId);
+    return this.offerModel
+      .aggregate([
+        ...addRatingToOffers,
+        { $addFields: { isFavorite: { $in: user?.favoriteOffersId } } },
         { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
         { $sort: { createdAt: SortType.Down } },
         { $limit: count }
@@ -103,25 +119,29 @@ export class DefaultOfferService implements OfferService {
       ]).exec();
   }
 
-  public async findFavorite(): Promise<DocumentType<OfferEntity>[]> {
+  public async findFavorite(userId: string): Promise<DocumentType<OfferEntity>[]> {
+    const user = await this.userModel.findById(userId);
     return this.offerModel
       .aggregate([
         {
           $match: {
-            isFavorite: true,
+            _id: { $in: user?.favoriteOffersId }
           }
         },
         ...addRatingToOffers,
+        { $addFields: { isFavorite: true } },
         { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
       ]).exec();
   }
 
-  public async addToFavorite(id: string): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel.findByIdAndUpdate(id, {isFavorite: true}, {new: true}).exec();
+  public async addToFavorite({userId, offerId}: {userId: string, offerId: string}): Promise<DocumentType<OfferEntity> | null> {
+    await this.userModel.findByIdAndUpdate(userId, { $push: {favoriteOffersId: offerId} }).exec();
+    return this.findById(offerId);
   }
 
-  public async deleteFromFavorite(id: string): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel.findByIdAndUpdate(id, {isFavorite: false}, {new: true}).exec();
+  public async deleteFromFavorite({userId, offerId}: {userId: string, offerId: string}): Promise<DocumentType<OfferEntity> | null> {
+    await this.userModel.findByIdAndUpdate(userId, { $pull: {favoriteOffersId: offerId} }).exec();
+    return this.findById(offerId);
   }
 
   public async updateById(id: string, dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null> {
