@@ -6,6 +6,7 @@ import { Logger } from '../../logger/index.js';
 import { Component } from '../../../types/index.js';
 import { HttpError } from '../errors/index.js';
 import { createErrorObject } from '../../../helpers/index.js';
+import { BaseUserException } from '../../../modules/auth/errors/index.js';
 
 @injectable()
 export class AppExceptionFilter implements ExceptionFilter {
@@ -28,6 +29,14 @@ export class AppExceptionFilter implements ExceptionFilter {
   }
 
   public catch(error: Error | HttpError, req: Request, res: Response, next: NextFunction) {
+    if (error instanceof BaseUserException) {
+      this.logger.error(`[AuthModule] ${error.message}`, error);
+      res.status(error.httpStatusCode)
+        .json({
+          type: 'AUTHORIZATION',
+          error: error.message,
+        });
+    }
     if (error instanceof HttpError) {
       return this.handleHttpError(error, req, res, next);
     }

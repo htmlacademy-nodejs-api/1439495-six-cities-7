@@ -20,8 +20,7 @@ export class RestApplication {
     @inject(Component.OfferController) private readonly offerController: Controller,
     @inject(Component.UserController) private readonly userController: Controller,
     @inject(Component.CommentController) private readonly commentController: Controller,
-    @inject(Component.ExceptionFilter) private readonly appExceptionFilter: ExceptionFilter,
-    @inject(Component.AuthExceptionFilter) private readonly authExceptionFilter: ExceptionFilter,
+    @inject(Component.ExceptionFilter) private readonly appExceptionFilter: ExceptionFilter
   ) {}
 
   private initDb() {
@@ -54,8 +53,7 @@ export class RestApplication {
     this.server.use(authenticateMiddleware.execute.bind(authenticateMiddleware));
   }
 
-  private async initExceptionFilters() {
-    this.server.use(this.authExceptionFilter.catch.bind(this.authExceptionFilter));
+  private async initExceptionFilter() {
     this.server.use(this.appExceptionFilter.catch.bind(this.appExceptionFilter));
   }
 
@@ -69,7 +67,7 @@ export class RestApplication {
     await this.initControllers();
     this.logger.info('Controller initialization completed');
 
-    await this.initExceptionFilters();
+    await this.initExceptionFilter();
 
     await this.initServer();
     this.logger.info(`Server started on http://localhost:${this.config.get('PORT')}`);

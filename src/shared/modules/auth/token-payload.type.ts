@@ -4,4 +4,4 @@ export type TokenPayload = {
     avatar: string;
     isPro: boolean;
     id: string;
-  };
+};
