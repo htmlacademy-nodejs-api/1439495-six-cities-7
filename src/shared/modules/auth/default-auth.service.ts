@@ -43,7 +43,6 @@ export class DefaultAuthService implements AuthService {
     const user = await this.userService.findByEmail(dto.mail);
 
     if (!user || !user.verifyPassword(dto.password, this.config.get('SALT'))) {
-      this.logger.warn(`Incorrect password for ${dto.mail}`);
       throw new BaseUserException(StatusCodes.UNAUTHORIZED, 'Incorrect user email or password');
     }
 
