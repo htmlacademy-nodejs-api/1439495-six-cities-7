@@ -72,7 +72,7 @@ export class DefaultOfferService implements OfferService {
             commentCount: { $size: '$comments' },
             rating: { $avg: '$comments.rating' },
             user: { '$arrayElemAt': ['$users', 0] },
-            isFavorite: { $in: '$user.favoriteOffersId' }
+            isFavorite: { _id: { $in: '$user.favoriteOffersId' } }
           }
         },
         { $unset: ['comments', 'users'] },
@@ -96,7 +96,7 @@ export class DefaultOfferService implements OfferService {
     return this.offerModel
       .aggregate([
         ...addRatingToOffers,
-        { $addFields: { isFavorite: { $in: user?.favoriteOffersId } } },
+        { $addFields: { isFavorite: { _id: { $in: user?.favoriteOffersId } } } },
         { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
         { $sort: { createdAt: SortType.Down } },
         { $limit: count }
