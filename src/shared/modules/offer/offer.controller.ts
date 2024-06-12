@@ -79,12 +79,7 @@ export class OfferController extends BaseController {
   }
 
   public async index(req: Request, res: Response): Promise<void> {
-    let offers = [];
-    if (req.tokenPayload.id) {
-      offers = await this.offerService.findAllForUser(req.tokenPayload.id);
-    } else {
-      offers = await this.offerService.findAll();
-    }
+    const offers = await this.offerService.findAll(req.tokenPayload.id);
     this.ok(res, fillDTO(OfferRdo, offers));
   }
 
@@ -93,8 +88,8 @@ export class OfferController extends BaseController {
     this.created(res, fillDTO(FullOfferRdo, result));
   }
 
-  public async getFullInfo(req: Request, res: Response): Promise<void> {
-    const offer = await this.offerService.findById(req.params.offerId);
+  public async getFullInfo({ tokenPayload, params }: Request, res: Response): Promise<void> {
+    const offer = await this.offerService.findById(params.offerId, tokenPayload.id);
     this.ok(res, fillDTO(FullOfferRdo, offer));
   }
 
@@ -120,11 +115,11 @@ export class OfferController extends BaseController {
 
   public async addToFavorite({ tokenPayload, params }: Request, res: Response): Promise<void> {
     const offer = await this.offerService.addToFavorite({userId: tokenPayload.id, offerId: params.offerId});
-    this.created(res, fillDTO(FullOfferRdo, offer));
+    this.ok(res, fillDTO(FullOfferRdo, offer));
   }
 
   public async deleteFromFavorite({ tokenPayload, params }: Request, res: Response): Promise<void> {
     const offer = await this.offerService.deleteFromFavorite({userId: tokenPayload.id, offerId: params.offerId});
-    this.noContent(res, fillDTO(FullOfferRdo, offer));
+    this.ok(res, fillDTO(FullOfferRdo, offer));
   }
 }

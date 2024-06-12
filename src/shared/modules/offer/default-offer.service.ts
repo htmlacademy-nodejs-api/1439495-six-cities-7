@@ -43,12 +43,14 @@ export class DefaultOfferService implements OfferService {
     return result;
   }
 
-  public async findById(id: string): Promise<DocumentType<OfferEntity> | null> {
+  public async findById(offerId: string, userId?: string): Promise<DocumentType<OfferEntity> | null> {
+    const user = await this.userModel.findById(userId);
+    const favoriteStatus = user ? { _id: { $in: user.favoriteOffersId } } : false;
     const result = await this.offerModel
       .aggregate<DocumentType<OfferEntity> | null>([
         {
           $match: {
-            _id: new Types.ObjectId(id),
+            _id: new Types.ObjectId(offerId),
           }
         },
         {
@@ -72,7 +74,7 @@ export class DefaultOfferService implements OfferService {
             commentCount: { $size: '$comments' },
             rating: { $avg: '$comments.rating' },
             user: { '$arrayElemAt': ['$users', 0] },
-            isFavorite: { _id: { $in: '$user.favoriteOffersId' } }
+            isFavorite: favoriteStatus
           }
         },
         { $unset: ['comments', 'users'] },
@@ -80,23 +82,13 @@ export class DefaultOfferService implements OfferService {
     return result[0];
   }
 
-  public async findAll(count: number = DEFAULT_OFFER_LIMIT): Promise<DocumentType<OfferEntity>[]> {
-    return this.offerModel
-      .aggregate([
-        ...addRatingToOffers,
-        { $addFields: { isFavorite: false } },
-        { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
-        { $sort: { createdAt: SortType.Down } },
-        { $limit: count }
-      ]).exec();
-  }
-
-  public async findAllForUser(userId: string, count: number = DEFAULT_OFFER_LIMIT): Promise<DocumentType<OfferEntity>[]> {
+  public async findAll(userId?: string, count: number = DEFAULT_OFFER_LIMIT): Promise<DocumentType<OfferEntity>[]> {
     const user = await this.userModel.findById(userId);
+    const favoriteStatus = user ? { _id: { $in: user.favoriteOffersId } } : false ;
     return this.offerModel
       .aggregate([
         ...addRatingToOffers,
-        { $addFields: { isFavorite: { _id: { $in: user?.favoriteOffersId } } } },
+        { $addFields: { isFavorite: favoriteStatus } },
         { $unset: ['comments', 'description', 'photo', 'rooms', 'guests', 'amenities', 'userId'] },
         { $sort: { createdAt: SortType.Down } },
         { $limit: count }

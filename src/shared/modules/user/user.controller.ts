@@ -23,9 +23,9 @@ export class UserController extends BaseController {
     super(logger);
 
     this.addRoute({
-      path: '/login',
+      path: '/profile',
       method: HttpMethod.Get,
-      handler: this.checkAuthenticate
+      handler: this.profile
     });
     this.addRoute({
       path: '/login',
@@ -72,7 +72,7 @@ export class UserController extends BaseController {
     });
   }
 
-  public async checkAuthenticate({ tokenPayload: { mail }}: Request, res: Response) {
+  public async profile({ tokenPayload: { mail }}: Request, res: Response) {
     const user = await this.userService.findByEmail(mail);
 
     if (!user) {
