@@ -7,6 +7,7 @@ import { DatabaseClient } from '../shared/libs/database-client/index.js';
 import { getMongoURI } from '../shared/helpers/index.js';
 import { Controller } from '../shared/libs/rest/controller/index.js';
 import { ExceptionFilter } from '../shared/libs/rest/exception-filter/index.js';
+import { ParseTokenMiddleware } from '../shared/libs/rest/middleware/index.js';
 
 @injectable()
 export class RestApplication {
@@ -45,9 +46,11 @@ export class RestApplication {
     this.server.use('/comments', this.commentController.router);
   }
 
-  private async initMiddleware() {
+  private async initMiddlewares() {
+    const authenticateMiddleware = new ParseTokenMiddleware(this.config.get('JWT_SECRET'));
     this.server.use(express.json());
     this.server.use('/uploads', express.static(this.config.get('UPLOAD_DIRECTORY')));
+    this.server.use(authenticateMiddleware.execute.bind(authenticateMiddleware));
   }
 
   private async initExceptionFilter() {
@@ -59,7 +62,7 @@ export class RestApplication {
 
     await this.initDb();
 
-    await this.initMiddleware();
+    await this.initMiddlewares();
 
     await this.initControllers();
     this.logger.info('Controller initialization completed');
