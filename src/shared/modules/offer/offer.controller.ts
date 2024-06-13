@@ -3,15 +3,17 @@ import { Request, Response } from 'express';
 import { BaseController } from '../../libs/rest/controller/index.js';
 import { City, Component, HttpMethod } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
-import { CreateOfferDto, OfferRdo, OfferService, FullOfferRdo, UpdateOfferDto } from './index.js';
+import { CreateOfferDto, OfferRdo, OfferService, FullOfferRdo, UpdateOfferDto, UploadImageRdo } from './index.js';
 import { fillDTO } from '../../helpers/index.js';
-import { DocumentExistsMiddleware, PrivateRouteMiddleware, ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/middleware/index.js';
+import { DocumentExistsMiddleware, PrivateRouteMiddleware, UploadFileMiddleware, ValidateDtoMiddleware, ValidateObjectIdMiddleware } from '../../libs/rest/middleware/index.js';
+import { Config, RestSchema } from '../../libs/config/index.js';
 
 @injectable()
 export class OfferController extends BaseController {
   constructor(
     @inject(Component.Logger) protected readonly logger: Logger,
-    @inject(Component.OfferService) private readonly offerService: OfferService
+    @inject(Component.OfferService) private readonly offerService: OfferService,
+    @inject(Component.Config) private readonly configService: Config<RestSchema>,
   ) {
     super(logger);
     this.addRoute({ path: '/', method: HttpMethod.Get, handler: this.index });
@@ -76,6 +78,16 @@ export class OfferController extends BaseController {
         new DocumentExistsMiddleware(this.offerService, 'Offer', 'offerId')
       ]
     });
+    this.addRoute({
+      path: '/:offerId/image',
+      method: HttpMethod.Post,
+      handler: this.uploadImage,
+      middlewares: [
+        new PrivateRouteMiddleware(),
+        new ValidateObjectIdMiddleware('offerId'),
+        new UploadFileMiddleware(this.configService.get('UPLOAD_DIRECTORY'), 'previewImage'),
+      ]
+    });
   }
 
   public async index(req: Request, res: Response): Promise<void> {
@@ -121,5 +133,11 @@ export class OfferController extends BaseController {
   public async deleteFromFavorite({ tokenPayload, params }: Request, res: Response): Promise<void> {
     const offer = await this.offerService.deleteFromFavorite({userId: tokenPayload.id, offerId: params.offerId});
     this.ok(res, fillDTO(FullOfferRdo, offer));
+  }
+
+  public async uploadImage({ params, file }: Request, res: Response) {
+    const updateDto = { previewImage: file?.filename };
+    await this.offerService.updateById(params.offerId, updateDto);
+    this.created(res, fillDTO(UploadImageRdo, updateDto));
   }
 }

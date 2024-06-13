@@ -33,9 +33,6 @@ export class CreateOfferDto {
   @IsEnum(City, { message: OfferValidationMessage.city.invalid })
   public city: City;
 
-  @Matches(/\.(gif|jpe?g|tiff?|png|webp|bmp)$/i, { message: OfferValidationMessage.image.invalidFormat })
-  public previewImage: string;
-
   @IsArray({ message: OfferValidationMessage.photo.invalidFormat })
   @ArrayMinSize(6, { message: OfferValidationMessage.photo.invalidFormat })
   @ArrayMaxSize(6, { message: OfferValidationMessage.photo.invalidFormat })

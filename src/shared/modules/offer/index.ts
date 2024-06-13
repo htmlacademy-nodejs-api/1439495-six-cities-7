@@ -7,3 +7,4 @@ export { createOfferContainer } from './offer.container.js';
 export { OfferController } from './offer.controller.js';
 export { OfferRdo } from './rdo/offer.rdo.js';
 export { FullOfferRdo } from './rdo/full-offer.rdo.js';
+export { UploadImageRdo } from './rdo/upload-image.rdo.js';

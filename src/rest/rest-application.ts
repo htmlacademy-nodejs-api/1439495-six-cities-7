@@ -4,10 +4,11 @@ import { Config, RestSchema } from '../shared/libs/config/index.js';
 import { Logger } from '../shared/libs/logger/index.js';
 import { Component } from '../shared/types/component.enum.js';
 import { DatabaseClient } from '../shared/libs/database-client/index.js';
-import { getMongoURI } from '../shared/helpers/index.js';
+import { getFullServerPath, getMongoURI } from '../shared/helpers/index.js';
 import { Controller } from '../shared/libs/rest/controller/index.js';
 import { ExceptionFilter } from '../shared/libs/rest/exception-filter/index.js';
 import { ParseTokenMiddleware } from '../shared/libs/rest/middleware/index.js';
+import { STATIC_FILES_ROUTE, STATIC_UPLOAD_ROUTE } from './index.js';
 
 @injectable()
 export class RestApplication {
@@ -44,12 +45,14 @@ export class RestApplication {
     this.server.use('/offers', this.offerController.router);
     this.server.use('/users', this.userController.router);
     this.server.use('/comments', this.commentController.router);
+    this.logger.info('Controller initialization completed');
   }
 
   private async initMiddlewares() {
     const authenticateMiddleware = new ParseTokenMiddleware(this.config.get('JWT_SECRET'));
     this.server.use(express.json());
-    this.server.use('/uploads', express.static(this.config.get('UPLOAD_DIRECTORY')));
+    this.server.use(STATIC_UPLOAD_ROUTE, express.static(this.config.get('UPLOAD_DIRECTORY')));
+    this.server.use(STATIC_FILES_ROUTE, express.static(this.config.get('STATIC_DIRECTORY')));
     this.server.use(authenticateMiddleware.execute.bind(authenticateMiddleware));
   }
 
@@ -65,11 +68,11 @@ export class RestApplication {
     await this.initMiddlewares();
 
     await this.initControllers();
-    this.logger.info('Controller initialization completed');
 
     await this.initExceptionFilter();
 
     await this.initServer();
-    this.logger.info(`Server started on http://localhost:${this.config.get('PORT')}`);
+
+    this.logger.info(`Server started on ${getFullServerPath(this.config.get('HOST'), this.config.get('PORT'))}`);
   }
 }

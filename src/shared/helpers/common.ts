@@ -25,3 +25,5 @@ export const reduceValidationErrors = (errors: ValidationError[]): ValidationErr
   value,
   messages: constraints ? Object.values(constraints) : []
 }));
+
+export const getFullServerPath = (host: string, port: number) => `http://${host}:${port}`;
