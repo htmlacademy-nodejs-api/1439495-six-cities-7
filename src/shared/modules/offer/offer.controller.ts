@@ -9,12 +9,14 @@ import { DocumentExistsMiddleware, PrivateRouteMiddleware, UploadFileMiddleware,
 import { Config, RestSchema } from '../../libs/config/index.js';
 import { HttpError } from '../../libs/rest/errors/index.js';
 import { StatusCodes } from 'http-status-codes';
+import { CommentService } from '../comment/index.js';
 
 @injectable()
 export class OfferController extends BaseController {
   constructor(
     @inject(Component.Logger) protected readonly logger: Logger,
     @inject(Component.OfferService) private readonly offerService: OfferService,
+    @inject(Component.CommentService) private readonly commentService: CommentService,
     @inject(Component.Config) private readonly configService: Config<RestSchema>,
   ) {
     super(logger);
@@ -130,6 +132,7 @@ export class OfferController extends BaseController {
       );
     }
     const result = await this.offerService.deleteById(req.params.offerId);
+    await this.commentService.deleteByOfferId(req.params.offerId);
     this.noContent(res, result);
   }
 
