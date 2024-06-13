@@ -37,10 +37,10 @@ export class DefaultOfferService implements OfferService {
     return result !== null;
   }
 
-  public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity>> {
+  public async create(dto: CreateOfferDto): Promise<DocumentType<OfferEntity> | null> {
     const result = await this.offerModel.create(dto);
     this.logger.info(`Offer ${dto.name} was successfully created`);
-    return result;
+    return this.findById(result.id);
   }
 
   public async findById(offerId: string, userId?: string): Promise<DocumentType<OfferEntity> | null> {
@@ -137,7 +137,8 @@ export class DefaultOfferService implements OfferService {
   }
 
   public async updateById(id: string, dto: UpdateOfferDto): Promise<DocumentType<OfferEntity> | null> {
-    return this.offerModel.findByIdAndUpdate(id, dto, {new: true}).populate(['userId']).exec();
+    await this.offerModel.findByIdAndUpdate(id, dto, {new: true}).populate(['userId']).exec();
+    return this.findById(id);
   }
 
   public async deleteById(id: string): Promise<DocumentType<OfferEntity> | null> {
