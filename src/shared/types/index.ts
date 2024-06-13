@@ -9,3 +9,6 @@ export { Component } from './component.enum.js';
 export { SortType } from './sort-type.enum.js';
 export { HttpMethod } from './http-method.enum.js';
 export { DocumentExists } from './document-exists.interface.js';
+export { ValidationErrorField } from './validation-error-field.type.js';
+export { ApplicationError } from './application-error.enum.js';
+export { RequestQuery } from './request-query.type.js';

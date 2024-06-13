@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { getRandomItem, generateRandomValue, getRandomArray, getRandomBooleanValue } from '../../helpers/index.js';
 import { MockServerData } from '../../types/index.js';
 import { OfferGenerator } from './index.js';
-import { FIRST_WEEK_DAY, LAST_WEEK_DAY, IMAGES_IN_OFFER, MAX_ROOMS, MAX_GUESTS, MIN_PRICE, MAX_PRICE, COUNT_AMENITIES_IN_OFFER, MAX_COMMENTS_NUMBER } from './tsv-offer-generator.const.js';
+import { FIRST_WEEK_DAY, LAST_WEEK_DAY, IMAGES_IN_OFFER, MAX_ROOMS, MAX_GUESTS, MIN_PRICE, MAX_PRICE, COUNT_AMENITIES_IN_OFFER } from './tsv-offer-generator.const.js';
 
 
 export class TSVOfferGenerator implements OfferGenerator {
@@ -18,8 +18,6 @@ export class TSVOfferGenerator implements OfferGenerator {
     const previewImage = getRandomItem(this.mockData.images);
     const photo = getRandomArray<string>(this.mockData.images, IMAGES_IN_OFFER).join(';');
     const isPremium = getRandomBooleanValue();
-    const isFavorite = getRandomBooleanValue();
-    const rating = generateRandomValue(1, 5);
     const type = getRandomItem(this.mockData.types);
     const rooms = generateRandomValue(1, MAX_ROOMS);
     const guests = generateRandomValue(1, MAX_GUESTS);
@@ -30,14 +28,13 @@ export class TSVOfferGenerator implements OfferGenerator {
     const avatar = getRandomItem(this.mockData.avatars);
     const password = getRandomItem(this.mockData.passwords);
     const isPro = getRandomBooleanValue();
-    const comments = generateRandomValue(0, MAX_COMMENTS_NUMBER);
     const [latitude, longitude] = getRandomItem(this.mockData.coordinates).split(' ');
 
     return [
       name, description, date, city, previewImage, photo,
-      isPremium, isFavorite, rating, type, rooms, guests,
+      isPremium, type, rooms, guests,
       price, amenities, userName, mail, avatar, password,
-      isPro, comments, latitude, longitude
+      isPro, latitude, longitude
     ].join('\t');
   }
 }

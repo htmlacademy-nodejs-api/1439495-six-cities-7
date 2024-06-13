@@ -21,8 +21,6 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       previewImage,
       photo,
       isPremium,
-      isFavorite,
-      rating,
       type,
       rooms,
       guests,
@@ -33,7 +31,6 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       avatar,
       password,
       isPro,
-      comments,
       latitude,
       longitude
     ] = row.split('\t');
@@ -46,15 +43,12 @@ export class TSVFileReader extends EventEmitter implements FileReader {
       previewImage,
       photo: photo.split(';'),
       isPremium: isPremium === 'true',
-      isFavorite: isFavorite === 'true',
-      rating: parseFloat(rating),
       type: type as OfferType,
       rooms: parseInt(rooms, 10),
       guests: parseInt(guests, 10),
       price: parseInt(price, 10),
       amenities: amenities.split(';') as Amenities[],
       user: { name: userName, mail, avatar, password, isPro: isPro === 'true' },
-      comments: parseInt(comments, 10),
       coordinates: { latitude, longitude }
     };
   }
@@ -70,8 +64,9 @@ export class TSVFileReader extends EventEmitter implements FileReader {
 
     for await (const chunk of readStream) {
       data += chunk.toString();
+      nextLinePosition = data.indexOf('\n');
 
-      while ((nextLinePosition = data.indexOf('\n')) !== -1) {
+      while (nextLinePosition !== -1) {
         const completeRow = data.slice(0, nextLinePosition);
         data = data.slice(++nextLinePosition);
 
@@ -79,7 +74,7 @@ export class TSVFileReader extends EventEmitter implements FileReader {
         await new Promise((resolve) => {
           this.emit('read', parsedOffer, resolve);
         });
-
+        nextLinePosition = data.indexOf('\n');
       }
     }
 

@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { BaseController } from '../../libs/rest/controller/index.js';
 import { Component, HttpMethod } from '../../types/index.js';
 import { Logger } from '../../libs/logger/index.js';
-import { CreateUserDto, LoginUserDto, UserRdo, UserService } from './index.js';
+import { CreateUserDto, LoginUserDto, UploadAvatarRdo, UserRdo, UserService } from './index.js';
 import { fillDTO } from '../../helpers/index.js';
 import { Config, RestSchema } from '../../libs/config/index.js';
 import { HttpError } from '../../libs/rest/errors/index.js';
@@ -66,10 +66,10 @@ export class UserController extends BaseController {
     this.created(res, fillDTO(UserRdo, result));
   }
 
-  public async uploadAvatar(req: Request, res: Response) {
-    this.created(res, {
-      filepath: req.file?.path
-    });
+  public async uploadAvatar({ params, file }: Request, res: Response) {
+    const uploadFile = { avatar: file?.filename };
+    await this.userService.updateById(params.userId, uploadFile);
+    this.created(res, fillDTO(UploadAvatarRdo, { filepath: uploadFile.avatar }));
   }
 
   public async profile({ tokenPayload: { mail }}: Request, res: Response) {

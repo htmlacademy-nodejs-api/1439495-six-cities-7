@@ -33,9 +33,6 @@ export class CreateOfferDto {
   @IsEnum(City, { message: OfferValidationMessage.city.invalid })
   public city: City;
 
-  @Matches(/\.(gif|jpe?g|tiff?|png|webp|bmp)$/i, { message: OfferValidationMessage.image.invalidFormat })
-  public previewImage: string;
-
   @IsArray({ message: OfferValidationMessage.photo.invalidFormat })
   @ArrayMinSize(6, { message: OfferValidationMessage.photo.invalidFormat })
   @ArrayMaxSize(6, { message: OfferValidationMessage.photo.invalidFormat })
@@ -44,9 +41,6 @@ export class CreateOfferDto {
 
   @IsBoolean({ message: OfferValidationMessage.boolean.invalidFormat })
   public isPremium: boolean;
-
-  @IsBoolean({ message: OfferValidationMessage.boolean.invalidFormat })
-  public isFavorite: boolean;
 
   @IsEnum(OfferType, { message: OfferValidationMessage.type.invalid })
   public type: OfferType;
