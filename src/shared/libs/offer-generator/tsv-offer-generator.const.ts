@@ -6,4 +6,3 @@ export const MAX_GUESTS = 10;
 export const MIN_PRICE = 100;
 export const MAX_PRICE = 100000;
 export const COUNT_AMENITIES_IN_OFFER = 3;
-export const MAX_COMMENTS_NUMBER = 20;

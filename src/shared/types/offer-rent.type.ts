@@ -12,14 +12,11 @@ export type OfferRent = {
   previewImage: string;
   photo: string[];
   isPremium: boolean;
-  isFavorite: boolean;
-  rating: number;
   type: OfferType;
   rooms: number;
   guests: number;
   price: number;
   amenities: Amenities[];
   user: User;
-  comments: number;
   coordinates: Coordinates;
 }
