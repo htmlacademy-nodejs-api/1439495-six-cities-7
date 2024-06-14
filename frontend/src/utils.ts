@@ -29,3 +29,9 @@ export class Token {
     localStorage.removeItem(this._name);
   }
 }
+
+export const getTime = () => {
+  const now = new Date();
+  return now.toISOString();
+};
+
